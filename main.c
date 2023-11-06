@@ -130,8 +130,8 @@ int main() {
 		exit(EXIT_FAILURE);
 	}
 
-	printf("Server is running");
-	printf("-----------------");
+	printf("Server is running\n");
+	printf("-----------------\n");
 
 	while (true) {
 		// Accept for connections
