@@ -51,6 +51,7 @@ char* find_requested_html_file(char* file_route, char* path_route) {
 
 	if (d) {
 		while ((dir = readdir(d)) != NULL) {
+			char path[1025] = "static/";
 			// Skip dot and double dot
 			if (strcmp(dir->d_name, ".") == 0) {
 				continue;
@@ -59,10 +60,15 @@ char* find_requested_html_file(char* file_route, char* path_route) {
 				continue;
 			}
 
-			if (is_directory(dir->d_name) == 1) {
+			strncat(path, dir->d_name, 300);
+
+			printf("%s\n", path);
+			printf("%i\n", is_directory(path));
+
+			if (is_directory(path) == 1) {
 				file_name = find_requested_html_file(file_route, dir->d_name);
 			}
-			if (strcmp(file_route, dir->d_name) == 0) {
+			if (strcmp(file_route, path) == 0) {
 				file_name = dir->d_name;
 			}
 		}
