@@ -62,14 +62,15 @@ char* find_requested_html_file(char* file_route, char* path_route) {
 
 			strncat(path, dir->d_name, 300);
 
-			printf("%s\n", path);
-			printf("%i\n", is_directory(path));
-
-			if (is_directory(path) == 1) {
-				file_name = find_requested_html_file(file_route, dir->d_name);
-			}
 			if (strcmp(file_route, path) == 0) {
-				file_name = dir->d_name;
+				file_name = file_route;
+
+				// Close directory
+				closedir(d);
+				return file_name;
+			}
+			else if (is_directory(path) == 1) {
+				//file_name = find_requested_html_file(file_route, path);
 			}
 		}
 
@@ -84,8 +85,16 @@ char* read_html_file(char* html_file_path) {
 	/* Read html file and returns its buffer */
 	FILE *fptr;
 
+	if (html_file_path == NULL) {
+		printf("Error: html file path not specified.\n");
+	}
+
 	// Open file
 	fptr = fopen(html_file_path, "r");
+
+	if (fptr == NULL) {
+		printf("Error: can't open file %s.\n", html_file_path);
+	}
 
 	char content_buf[MAX_HTML_CHARACTER_LIMIT] = "";
 	char line[100];
@@ -210,9 +219,13 @@ int main() {
 
 		// find if requested file exists in web server
 		char* file_name = find_requested_html_file(file_route, "static");
+		printf("Found file %s\n", file_name);
 
 		// read HTML file
 		char* buf = read_html_file(file_name);
+
+	
+		printf("Scream");
 
 		// Store HTML char pointer data
 		char response[MAX_HTML_CHARACTER_LIMIT+100] = "HTTP/1.1 200 OK\n\n";
