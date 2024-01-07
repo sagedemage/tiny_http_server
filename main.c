@@ -22,14 +22,9 @@ static struct sockaddr_in setup_address() {
 	return address;
 }
 
-char* sub_str(char* str, int start, int end) {
+void sub_str(char* result, char* str, int start, int end) {
 	/* Get a sub string of a char pointer */
-	char result[25] = "";
-
 	strncpy(result, str + start, end - start);
-
-	char* result_ptr = result;
-	return result_ptr;
 }
 
 int is_directory(const char* path) {
@@ -51,7 +46,11 @@ char* find_requested_html_file(char* file_route, char* path_route) {
 
 	if (d) {
 		while ((dir = readdir(d)) != NULL) {
-			char path[1025] = "static/";
+			// append the path route with slash as the path
+			char path[1025] = "";
+			strncat(path, path_route, 300);
+			strncat(path, "/", 300);
+
 			// Skip dot and double dot
 			if (strcmp(dir->d_name, ".") == 0) {
 				continue;
@@ -70,7 +69,7 @@ char* find_requested_html_file(char* file_route, char* path_route) {
 				return file_name;
 			}
 			else if (is_directory(path) == 1) {
-				//file_name = find_requested_html_file(file_route, path);
+				file_name = find_requested_html_file(file_route, path);
 			}
 		}
 
@@ -201,13 +200,18 @@ int main() {
 		char static_folder[100] = "static";
 		file_route = strncat(static_folder, file_route, 50);
 		char file_route_last_char = file_route[strlen(file_route) -1];
+		
 		// file with .ico file extension
 		int length = strlen(file_route);
-		char* ico_extension = sub_str(file_route, length - 4, length); 
-		//file_route.substr(strlen(file_route)-4, -1);
+
+		char ico_ext_result[1025] = "";
+		sub_str(ico_ext_result, file_route, length - 4, length);
+		char* ico_extension = ico_ext_result;
+
 		// file with .html file extension
-		char* html_extension = sub_str(file_route, length - 5, length);
-		//file_route.substr(strlen(file_route)-5, -1);
+		char html_ext_result[1025] = "";
+		sub_str(html_ext_result, file_route, length - 5, length);
+		char* html_extension = html_ext_result;
 
 		if (file_route_last_char == '/') {
 			strncat(file_route, "index.html", 100);
@@ -218,7 +222,6 @@ int main() {
 		
 		// find if requested file exists in web server
 		char* file_name = find_requested_html_file(file_route, "static");
-		printf("Found file %s\n", file_name);
 
 		// read HTML file
 		char* buf = read_html_file(file_name);
