@@ -204,14 +204,14 @@ int main() {
 		// file with .ico file extension
 		int length = strlen(file_route);
 
-		char result1[1025] = "";
-		sub_str(result1, file_route, length - 4, length);
-		char* ico_extension = result1;
+		char ico_ext_result[1025] = "";
+		sub_str(ico_ext_result, file_route, length - 4, length);
+		char* ico_extension = ico_ext_result;
 
 		// file with .html file extension
-		char result2[1025] = "";
-		sub_str(result2, file_route, length - 5, length);
-		char* html_extension = result2;
+		char html_ext_result[1025] = "";
+		sub_str(html_ext_result, file_route, length - 5, length);
+		char* html_extension = html_ext_result;
 
 		if (file_route_last_char == '/') {
 			strncat(file_route, "index.html", 100);
