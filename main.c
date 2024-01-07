@@ -46,7 +46,7 @@ char* find_requested_html_file(char* file_route, char* path_route) {
 
 	if (d) {
 		while ((dir = readdir(d)) != NULL) {
-			// append path route as the path with the slash
+			// append the path route with slash as the path
 			char path[1025] = "";
 			strncat(path, path_route, 300);
 			strncat(path, "/", 300);
