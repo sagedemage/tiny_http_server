@@ -216,16 +216,12 @@ int main() {
 			strncat(file_route, "/index.html", 100);
 		}
 		
-
 		// find if requested file exists in web server
 		char* file_name = find_requested_html_file(file_route, "static");
 		printf("Found file %s\n", file_name);
 
 		// read HTML file
 		char* buf = read_html_file(file_name);
-
-	
-		printf("Scream");
 
 		// Store HTML char pointer data
 		char response[MAX_HTML_CHARACTER_LIMIT+100] = "HTTP/1.1 200 OK\n\n";
