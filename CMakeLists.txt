@@ -11,9 +11,6 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${STANDARD_C_VERSION_FLAG} ${OPTIMIZE_FLAG} 
 
 file(COPY static DESTINATION ${CMAKE_BINARY_DIR})
 
-# -Wdeclaration-after-statement
-# -Wno-shadow-ivar
-
 add_executable(http_server 
     main.c
 )
