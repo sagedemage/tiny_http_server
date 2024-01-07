@@ -9,6 +9,8 @@ set(OPTIMIZE_FLAG "-O3")
 set(WARNING_FLAGS "-Werror -Wpedantic -Wall -Wextra -Wno-return-local-addr -Wno-maybe-uninitialized")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${STANDARD_C_VERSION_FLAG} ${OPTIMIZE_FLAG} ${WARNING_FLAGS}")
 
+file(COPY static DESTINATION ${CMAKE_BINARY_DIR})
+
 # -Wdeclaration-after-statement
 # -Wno-shadow-ivar
 
