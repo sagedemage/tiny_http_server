@@ -13,12 +13,12 @@
 #define PORT 8000
 #define MAX_HTML_CHARACTER_LIMIT 10000
 
-static struct sockaddr_in setup_address() {
+static struct sockaddr_in setup_address(int port) {
 	/* Setup Address */
 	struct sockaddr_in address;
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = INADDR_ANY;
-	address.sin_port = htons(PORT);
+	address.sin_port = htons(port);
 	return address;
 }
 
@@ -112,11 +112,11 @@ char* read_html_file(char* html_file_path) {
 	return content_buf_ptr;
 }
 
-int main() {
+int main(void) {
 	int opt = 1;
 
 	// Setup address
-	struct sockaddr_in address = setup_address();
+	struct sockaddr_in address = setup_address(PORT);
 	socklen_t addrlen = sizeof(address);
 
 	int server_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -145,7 +145,8 @@ int main() {
 	}
 
 	printf("Server is running\n");
-	printf("-----------------\n");
+    printf("at http://localhost:%i\n", PORT);
+	printf("------------------------\n");
 
 	while (true) {
 		// Accept for connections
