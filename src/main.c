@@ -9,10 +9,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define PORT 8000
-#define MAX_HTML_CHARACTER_LIMIT 10000
+enum {
+    PORT = 8000,
+    MAX_HTML_CHARACTER_LIMIT = 10000,
+};
 
-static struct sockaddr_in setup_address(int port) {
+static struct sockaddr_in SetupAddress(int port) {
     /* Setup Address */
     struct sockaddr_in address;
     address.sin_family = AF_INET;
@@ -21,12 +23,12 @@ static struct sockaddr_in setup_address(int port) {
     return address;
 }
 
-void sub_str(char* result, char* str, int start, int end) {
+void SubStr(char* result, char* str, int start, int end) {
     /* Get a sub string of a char pointer */
     strncpy(result, str + start, end - start);
 }
 
-int is_directory(const char* path) {
+int IsDirectory(const char* path) {
     struct stat statbuf;
     if (stat(path, &statbuf) == 0) {
         return S_ISDIR(statbuf.st_mode);
@@ -34,10 +36,10 @@ int is_directory(const char* path) {
     return 0;
 }
 
-char* find_requested_html_file(char* file_route, char* path_route) {
+char* FindRequestedHtmlFile(char* file_route, char* path_route) {
     /* Recursively look through the directory to find the requested html file */
-    DIR* d;
-    struct dirent* dir;
+    DIR* d = NULL;
+    struct dirent* dir = NULL;
     char* file_name = "static/404.html";
 
     // Open directory
@@ -60,14 +62,14 @@ char* find_requested_html_file(char* file_route, char* path_route) {
 
             strncat(path, dir->d_name, 300);
 
-            if (strcmp(file_route, path) == 0) {
+            if (IsDirectory(path) == 1) {
+                file_name = FindRequestedHtmlFile(file_route, path);
+            } else if (strcmp(file_route, path) == 0) {
                 file_name = file_route;
 
                 // Close directory
                 closedir(d);
                 return file_name;
-            } else if (is_directory(path) == 1) {
-                file_name = find_requested_html_file(file_route, path);
             }
         }
 
@@ -78,9 +80,9 @@ char* find_requested_html_file(char* file_route, char* path_route) {
     return file_name;
 }
 
-char* read_html_file(char* html_file_path) {
+void ReadHtmlFile(const char* html_file_path, char** content) {
     /* Read html file and returns its buffer */
-    FILE* fptr;
+    FILE* fptr = NULL;
 
     if (html_file_path == NULL) {
         printf("Error: html file path not specified.\n");
@@ -93,7 +95,7 @@ char* read_html_file(char* html_file_path) {
         printf("Error: can't open file %s.\n", html_file_path);
     }
 
-    char content_buf[MAX_HTML_CHARACTER_LIMIT] = "";
+    char* content_buf = calloc(MAX_HTML_CHARACTER_LIMIT, sizeof(char));
     char line[100];
 
     // Add line of the content to the content buffer
@@ -102,19 +104,20 @@ char* read_html_file(char* html_file_path) {
     }
 
     // Close file
-    fclose(fptr);
+    int success = fclose(fptr);
 
-    // Convet char array to pointer
-    char* content_buf_ptr = content_buf;
+    if (success != 0) {
+        printf("Unable to close file!");
+    }
 
-    return content_buf_ptr;
+    *content = content_buf;
 }
 
 int main(void) {
     int opt = 1;
 
     // Setup address
-    struct sockaddr_in address = setup_address(PORT);
+    struct sockaddr_in address = SetupAddress(PORT);
     socklen_t addrlen = sizeof(address);
 
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -166,15 +169,15 @@ int main(void) {
             return -1;
         }
 
-        char* temp2 = (char*)read_buf;
+        char* temp_p = (char*)read_buf;
 
-        char temp3[1024] = {0};
+        char temp_arr[1024] = {0};
 
-        for (long unsigned int i = 0; i < strlen(temp2); i++) {
-            temp3[i] = temp2[i];
+        for (long unsigned int i = 0; i < strlen(temp_p); i++) {
+            temp_arr[i] = temp_p[i];
         }
 
-        char* line = strtok(temp3, "\n");
+        char* line = strtok(temp_arr, "\n");
 
         char* request = "";
 
@@ -202,15 +205,15 @@ int main(void) {
         char file_route_last_char = file_route[strlen(file_route) - 1];
 
         // file with .ico file extension
-        int length = strlen(file_route);
+        int length = (int)strlen(file_route);
 
         char ico_ext_result[1025] = "";
-        sub_str(ico_ext_result, file_route, length - 4, length);
+        SubStr(ico_ext_result, file_route, length - 4, length);
         char* ico_extension = ico_ext_result;
 
         // file with .html file extension
         char html_ext_result[1025] = "";
-        sub_str(html_ext_result, file_route, length - 5, length);
+        SubStr(html_ext_result, file_route, length - 5, length);
         char* html_extension = html_ext_result;
 
         if (file_route_last_char == '/') {
@@ -221,23 +224,29 @@ int main(void) {
         }
 
         // find if requested file exists in web server
-        char* file_name = find_requested_html_file(file_route, "static");
+        const char* file_name = FindRequestedHtmlFile(file_route, "static");
+
+        printf("File name: %s\n", file_name);
 
         // read HTML file
-        char* buf = read_html_file(file_name);
+        char* buf = NULL;
+        ReadHtmlFile(file_name, &buf);
 
         // Store HTML char pointer data
         char response[MAX_HTML_CHARACTER_LIMIT + 100] = "HTTP/1.1 200 OK\n\n";
         char* html = strncat(response, buf, MAX_HTML_CHARACTER_LIMIT);
 
+        // free memory
+        free(buf);
+
         // Send the buffer of html web page
         ssize_t send_status = send(new_socket, html, strlen(html), 0);
 
-        if (send_status == -1) {
+        if (send_status != -1) {
+            printf("%s", (char*)read_buf);
+        } else {
             printf("Sending the message failed \n");
             return -1;
-        } else {
-            printf("%s", (char*)read_buf);
         }
 
         // close the socket
