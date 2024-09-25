@@ -252,7 +252,6 @@ size_t ReadHtmlFile(const char* html_file_path, char** content) {
 
     char* content_buf =
         (char*)calloc(char_buf_size, char_buf_size * sizeof(char));
-    // char* content_buf = (char*)malloc(char_buf_size * sizeof(content_buf));
 
     if (content_buf == NULL) {
         printf("Unable to perform allocation of the array.\n");
