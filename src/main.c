@@ -11,7 +11,7 @@
 
 enum {
     PORT = 8000,
-    MAX_HTML_CHARACTER_LIMIT = 10000,
+    MAX_HTML_CHARACTER_LIMIT = 1000,
 };
 
 static struct sockaddr_in SetupAddress(int port) {
@@ -80,8 +80,12 @@ char* FindRequestedHtmlFile(char* file_route, char* path_route) {
     return file_name;
 }
 
-void ReadHtmlFile(const char* html_file_path, char** content) {
+size_t ReadHtmlFile(const char* html_file_path, char** content) {
     /* Read html file and returns its buffer */
+    // Keep track of the size of the content
+    // buffer when characters are added to it
+    size_t char_buf_size = MAX_HTML_CHARACTER_LIMIT;
+
     FILE* fptr = NULL;
 
     if (html_file_path == NULL) {
@@ -95,13 +99,46 @@ void ReadHtmlFile(const char* html_file_path, char** content) {
         printf("Error: can't open file %s.\n", html_file_path);
     }
 
-    char* content_buf = calloc(MAX_HTML_CHARACTER_LIMIT, sizeof(char));
+    char* content_buf =
+        (char*)calloc(char_buf_size, char_buf_size * sizeof(char));
+    // char* content_buf = (char*)malloc(char_buf_size * sizeof(content_buf));
+
+    if (content_buf == NULL) {
+        printf("Unable to perform allocation of the array.\n");
+    }
+
     char line[100];
+
+    size_t num_of_chars_after_concat = 0;
+    char* temp = NULL;
 
     // Add line of the content to the content buffer
     while (fgets(line, 100, fptr)) {
+        /* Get the number of chars after string
+        concatination to check if it would cause a
+        buffer overflow. If that is the case, the array
+        must be reallocated to a bigger size to avoid
+        a buffer overflow */
+
+        num_of_chars_after_concat += 100;
+        if (num_of_chars_after_concat > char_buf_size) {
+            char_buf_size *= 2;
+            temp = (char*)realloc(content_buf, char_buf_size * sizeof(char));
+
+            if (temp != NULL) {
+                content_buf = temp;
+            } else {
+                printf("Unable to reallocate that array to a bigger size.\n");
+            }
+        }
+
+        // Issue here
         strncat(content_buf, line, 100);
+
+        char_buf_size += 100;
     }
+
+    *content = content_buf;
 
     // Close file
     int success = fclose(fptr);
@@ -110,7 +147,7 @@ void ReadHtmlFile(const char* html_file_path, char** content) {
         printf("Unable to close file!");
     }
 
-    *content = content_buf;
+    return char_buf_size;
 }
 
 int main(void) {
@@ -230,13 +267,17 @@ int main(void) {
 
         // read HTML file
         char* buf = NULL;
-        ReadHtmlFile(file_name, &buf);
+        size_t char_buf_size = ReadHtmlFile(file_name, &buf);
 
         // Store HTML char pointer data
-        char response[MAX_HTML_CHARACTER_LIMIT + 100] = "HTTP/1.1 200 OK\n\n";
+        char* response = calloc(char_buf_size + 100, sizeof(char));
+        strncpy(response, "HTTP/1.1 200 OK\n\n", 100);
+        //-response = "HTTP/1.1 200 OK\n\n";
+        //-char response[char_buf_size + 100] = "HTTP/1.1 200 OK\n\n";
         char* html = strncat(response, buf, MAX_HTML_CHARACTER_LIMIT);
 
         // free memory
+        free(response);
         free(buf);
 
         // Send the buffer of html web page
