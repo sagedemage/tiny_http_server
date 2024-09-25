@@ -144,8 +144,6 @@ int main(void) {
         // Store HTML char pointer data
         char* response = calloc(char_buf_size + 100, sizeof(char));
         strncpy(response, "HTTP/1.1 200 OK\n\n", 100);
-        //-response = "HTTP/1.1 200 OK\n\n";
-        //-char response[char_buf_size + 100] = "HTTP/1.1 200 OK\n\n";
         char* html = strncat(response, buf, char_buf_size);
 
         // Send the buffer of html web page
