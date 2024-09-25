@@ -280,7 +280,6 @@ size_t ReadHtmlFile(const char* html_file_path, char** content) {
             }
         }
 
-        // Issue here
         strncat(content_buf, line, 100);
 
         char_buf_size += 100;
