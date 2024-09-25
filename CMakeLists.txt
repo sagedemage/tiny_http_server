@@ -6,7 +6,7 @@ set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(STANDARD_C_VERSION_FLAG "-std=c17")
 set(OPTIMIZE_FLAG "-O2")
-set(WARNING_FLAGS "-Werror -Wpedantic -Wall -Wno-unused-variable")
+set(WARNING_FLAGS "-Werror -Wpedantic -Wall")
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	# Clang compiler
