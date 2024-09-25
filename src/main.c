@@ -264,11 +264,9 @@ size_t ReadHtmlFile(const char* html_file_path, char** content) {
 
     // Add line of the content to the content buffer
     while (fgets(line, 100, fptr)) {
-        /* Get the number of chars after string
-        concatination to check if it would cause a
-        buffer overflow. If that is the case, the array
-        must be reallocated to a bigger size to avoid
-        a buffer overflow */
+        /* Get the number of chars after string concatination to check if it
+         * would cause a buffer overflow. If that is the case, the array must be
+         * reallocated to a bigger size to avoid a buffer overflow */
 
         num_of_chars_after_concat += 100;
         if (num_of_chars_after_concat > char_buf_size) {
