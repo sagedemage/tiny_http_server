@@ -150,6 +150,16 @@ size_t ReadHtmlFile(const char* html_file_path, char** content) {
     return char_buf_size;
 }
 
+void FreeResources(char* response, char* buf, int new_socket) {
+    /* Free resources */
+    // free memory
+    free(response);
+    free(buf);
+
+    // close the socket
+    close(new_socket);
+}
+
 int main(void) {
     int opt = 1;
 
@@ -276,10 +286,6 @@ int main(void) {
         //-char response[char_buf_size + 100] = "HTTP/1.1 200 OK\n\n";
         char* html = strncat(response, buf, char_buf_size);
 
-        // free memory
-        free(response);
-        free(buf);
-
         // Send the buffer of html web page
         ssize_t send_status = send(new_socket, html, strlen(html), 0);
 
@@ -287,10 +293,14 @@ int main(void) {
             printf("%s", (char*)read_buf);
         } else {
             printf("Sending the message failed \n");
+
+            // free resources
+            FreeResources(response, buf, new_socket);
+
             return -1;
         }
 
-        // close the socket
-        close(new_socket);
+        // free resources
+        FreeResources(response, buf, new_socket);
     }
 }
